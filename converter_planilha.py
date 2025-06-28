@@ -8,10 +8,11 @@ def geraDicionario():
     horarios_vagos_por_arquivo = {}
     index_horario = {}
     cont = 1
-
+    nomes = []
     # Percorre todos os arquivos CSV da pasta
     for nome_arquivo in os.listdir(pasta):
         if nome_arquivo.endswith('.csv'):
+            nomes.append(nomes)
             caminho_arquivo = os.path.join(pasta, nome_arquivo)
             df = pd.read_csv(caminho_arquivo)
 
@@ -27,4 +28,4 @@ def geraDicionario():
             
 
     # Exibe o dicionário final
-    return horarios_vagos_por_arquivo, index_horario, cont
+    return nomes, horarios_vagos_por_arquivo, index_horario, cont

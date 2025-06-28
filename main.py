@@ -1,73 +1,41 @@
 from converter_planilha import geraDicionario
-import heapq
+from itertools import combinations
 
+# Carrega os dados
+nomes, dados, convercao, n = geraDicionario()
 
-def dijkstra(G, start, end):
-    dist = {v: float('inf') for v in G}
-    prev = {v: None for v in G}
-    dist[start] = 0
-    queue = [(0, start)]
-
-    while queue:
-        d, u = heapq.heappop(queue)
-        if u == end:
-            break
-        for v in G.get(u, []):
-            alt = d + 1  # peso fixo
-            if alt < dist[v]:
-                dist[v] = alt
-                prev[v] = u
-                heapq.heappush(queue, (alt, v))
-
-    path = []
-    u = end
-    if prev[u] or u == start:
-        while u is not None:
-            path.insert(0, u)
-            u = prev[u]
-    return path, dist[end]
-
-
-dados, convercao, n = geraDicionario()
-
-G = {}
-pessoas = list(dados.keys())
-convercao[0] = "start"
-convercao[n] = "end"
-
-# Cria conexões internas por pessoa (todos os horarios de uma pessoa são conectados entre si)
+# Inverte os dados: horário -> pessoas que têm disponível
+horarios_disponiveis = {}
 for pessoa, horarios in dados.items():
-    indices = list(horarios.values())
-    for i in indices:
-        G[i] = [x for x in indices if x != i]
+    for horario_str, idx in horarios.items():
+        if horario_str not in horarios_disponiveis:
+            horarios_disponiveis[horario_str] = set()
+        horarios_disponiveis[horario_str].add(pessoa)
 
-# Conecta pessoas sucessivas com base em interseção de horarios
-for i in range(len(pessoas) - 1):
-    atual = dados[pessoas[i]]
-    proxima = dados[pessoas[i + 1]]
-    intersecao = set(atual.keys()) & set(proxima.keys())
-    for horario in intersecao:
-        origem = atual[horario]
-        destino = proxima[horario]
-        G.setdefault(origem, []).append(destino)
+# Total de pessoas no grupo
+total_pessoas = set(dados.keys())
 
-# Cria nós de início e fim
-start = 0
-end = n
-G[start] = list(dados[pessoas[0]].values())
-G[end] = []
-for val in dados[pessoas[-1]].values():
-    G.setdefault(val, []).append(end)
+# Função para verificar se um conjunto de horários cobre todas as pessoas
+def cobre_todos(horarios):
+    pessoas_cobertas = set()
+    for h in horarios:
+        pessoas_cobertas.update(horarios_disponiveis[h])
+    return pessoas_cobertas == total_pessoas
 
-# Executa Dijkstra
-caminho, custo = dijkstra(G, start, end)
-print("Caminho encontrado:", caminho)
-print("Custo:", custo)
+# Lista de todos os horários disponíveis
+todos_horarios = list(horarios_disponiveis.keys())
 
-horarios_comun = []
+# Coleta todas as combinações válidas de até 3 horários que cubram todos
+combinacoes_validas = []
+for r in range(1, 3):  # 1, 2 ou 3 horários
+    for combinacao in combinations(todos_horarios, r):
+        if cobre_todos(combinacao):
+            combinacoes_validas.append(combinacao)
 
-for i in caminho:
-    if convercao[i] not in horarios_comun:
-        horarios_comun.append(convercao[i])
-
-print(horarios_comun)
+# Exibe os resultados
+print(f"\nTotal de combinações encontradas: {len(combinacoes_validas)}\n")
+for i, c in enumerate(combinacoes_validas, 1):
+    print(f"Opção {i}:")
+    for horario in c:
+        print(f" - {horario}")
+    print()

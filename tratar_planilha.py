@@ -11,7 +11,7 @@ def tratar_arquivo(caminho_arquivo):
     df = df.drop(df.columns[6], axis=1)
     df = df.drop(df.columns[6], axis=1)
     df = df.drop(df.columns[6], axis=1)
-    df = df.drop([0, 7, 13], axis=0)
+    df = df.drop([0, 7, 13, 14, 15, 16, 17, 18], axis=0)
 
     # Resetar índice para manter a linha que será cabeçalho como 0
     df = df.reset_index(drop=True)
@@ -38,3 +38,5 @@ def converteDadosBrutos():
 
             df_tratado.to_csv(caminho_saida, index=False)
             print(f"Arquivo exportado: {novo_nome}")
+
+converteDadosBrutos()
